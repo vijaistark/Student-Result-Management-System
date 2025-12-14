@@ -16,7 +16,7 @@ define('DB_USER', 'root');
 // 
 // TROUBLESHOOTING: If you get "Access denied" error, run test_db_connection.php
 // to find the correct password, then update this value.
-define('DB_PASS', '');  // CHANGE THIS: Try '', 'root', or your actual password
+define('DB_PASS', 'root');  // CHANGE THIS: Try '', 'root', or your actual password
 
 define('DB_NAME', 'student_result_system');
 
