@@ -216,10 +216,21 @@ closeDBConnection($conn);
             </div>
         </div>
         
+        <!-- Management Section -->
+        <div class="dashboard-section">
+            <h2>Management Options</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                <a href="manage_students.php" class="btn btn-primary">Manage Students</a>
+                <a href="manage_subjects.php" class="btn btn-primary">Manage Subjects</a>
+                <a href="manage_staff.php" class="btn btn-primary">Manage Staff</a>
+                <a href="view_results.php" class="btn btn-info">View/Edit Results</a>
+            </div>
+        </div>
+        
         <!-- View All Results Link -->
         <div class="dashboard-section">
             <h2>Results Overview</h2>
-            <p>View all student results (Read-only access)</p>
+            <p>View and manage all student results</p>
             <a href="view_results.php" class="btn btn-primary">View All Results</a>
         </div>
     </div>

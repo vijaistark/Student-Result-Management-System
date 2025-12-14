@@ -24,6 +24,34 @@ if (!$subject) {
     exit();
 }
 
+// Sorting
+$sort_by = $_GET['sort'] ?? 'student_id';
+$sort_order = strtoupper($_GET['order'] ?? 'ASC');
+$allowed_sort = ['student_id', 'student_name', 'marks_obtained', 'percentage', 'grade', 'posted_at'];
+$sort_by = in_array($sort_by, $allowed_sort) ? $sort_by : 'student_id';
+$sort_order = ($sort_order === 'ASC' || $sort_order === 'DESC') ? $sort_order : 'ASC';
+
+// Build ORDER BY clause
+$total_marks = $subject['total_marks'];
+$order_by = "s.student_id";
+switch ($sort_by) {
+    case 'student_name':
+        $order_by = "s.full_name";
+        break;
+    case 'marks_obtained':
+        $order_by = "m.marks_obtained";
+        break;
+    case 'percentage':
+        $order_by = "(m.marks_obtained / {$total_marks} * 100)";
+        break;
+    case 'grade':
+        $order_by = "(m.marks_obtained / {$total_marks} * 100)";
+        break;
+    case 'posted_at':
+        $order_by = "m.posted_at";
+        break;
+}
+
 // Get marks posted by this staff for this subject
 $marks = [];
 $query = "
@@ -34,7 +62,7 @@ $query = "
     FROM marks m
     INNER JOIN students s ON m.student_id = s.id
     WHERE m.subject_id = ? AND m.staff_id = ?
-    ORDER BY s.student_id
+    ORDER BY {$order_by} {$sort_order}
 ";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("ii", $subject_id, $staff_id);
@@ -68,6 +96,32 @@ closeDBConnection($conn);
             <h3><?php echo htmlspecialchars($subject['subject_code'] . ' - ' . $subject['subject_name']); ?></h3>
             <p><strong>Total Marks:</strong> <?php echo $subject['total_marks']; ?></p>
             <p class="info-text">📋 This is a read-only view. Marks cannot be edited or deleted once posted.</p>
+        </div>
+        
+        <!-- Sort Options -->
+        <div style="margin-bottom: 15px;">
+            <form method="GET" action="" style="display: flex; gap: 10px; align-items: flex-end;">
+                <input type="hidden" name="subject_id" value="<?php echo $subject_id; ?>">
+                <div class="form-group" style="flex: 1;">
+                    <label for="sort">Sort By</label>
+                    <select id="sort" name="sort" style="width: 100%;">
+                        <option value="student_id" <?php echo $sort_by === 'student_id' ? 'selected' : ''; ?>>Student ID</option>
+                        <option value="student_name" <?php echo $sort_by === 'student_name' ? 'selected' : ''; ?>>Student Name</option>
+                        <option value="marks_obtained" <?php echo $sort_by === 'marks_obtained' ? 'selected' : ''; ?>>Marks</option>
+                        <option value="percentage" <?php echo $sort_by === 'percentage' ? 'selected' : ''; ?>>Percentage</option>
+                        <option value="grade" <?php echo $sort_by === 'grade' ? 'selected' : ''; ?>>Grade</option>
+                        <option value="posted_at" <?php echo $sort_by === 'posted_at' ? 'selected' : ''; ?>>Date</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="order">Order</label>
+                    <select id="order" name="order" style="width: 100%;">
+                        <option value="ASC" <?php echo $sort_order === 'ASC' ? 'selected' : ''; ?>>Ascending</option>
+                        <option value="DESC" <?php echo $sort_order === 'DESC' ? 'selected' : ''; ?>>Descending</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Sort</button>
+            </form>
         </div>
         
         <div class="table-container">

@@ -27,6 +27,30 @@ if (!$student) {
 
 $student_id = $student['id'];
 
+// Sorting
+$sort_by = $_GET['sort'] ?? 'subject_code';
+$sort_order = strtoupper($_GET['order'] ?? 'ASC');
+$allowed_sort = ['subject_code', 'subject_name', 'marks_obtained', 'percentage', 'grade'];
+$sort_by = in_array($sort_by, $allowed_sort) ? $sort_by : 'subject_code';
+$sort_order = ($sort_order === 'ASC' || $sort_order === 'DESC') ? $sort_order : 'ASC';
+
+// Build ORDER BY clause
+$order_by = "sub.subject_code";
+switch ($sort_by) {
+    case 'subject_name':
+        $order_by = "sub.subject_name";
+        break;
+    case 'marks_obtained':
+        $order_by = "m.marks_obtained";
+        break;
+    case 'percentage':
+        $order_by = "(m.marks_obtained / sub.total_marks * 100)";
+        break;
+    case 'grade':
+        $order_by = "(m.marks_obtained / sub.total_marks * 100)";
+        break;
+}
+
 // Get all marks for this student
 $marks = [];
 $query = "
@@ -40,7 +64,7 @@ $query = "
     INNER JOIN subjects sub ON m.subject_id = sub.id
     INNER JOIN users u ON m.staff_id = u.id
     WHERE m.student_id = ?
-    ORDER BY sub.subject_code
+    ORDER BY {$order_by} {$sort_order}
 ";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $student_id);
@@ -157,6 +181,31 @@ closeDBConnection($conn);
         <!-- Marks Table -->
         <div class="dashboard-section">
             <h2>My Results</h2>
+            
+            <!-- Sort Options -->
+            <div style="margin-bottom: 15px;">
+                <form method="GET" action="" style="display: flex; gap: 10px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="sort">Sort By</label>
+                        <select id="sort" name="sort" style="width: 100%;">
+                            <option value="subject_code" <?php echo $sort_by === 'subject_code' ? 'selected' : ''; ?>>Subject Code</option>
+                            <option value="subject_name" <?php echo $sort_by === 'subject_name' ? 'selected' : ''; ?>>Subject Name</option>
+                            <option value="marks_obtained" <?php echo $sort_by === 'marks_obtained' ? 'selected' : ''; ?>>Marks</option>
+                            <option value="percentage" <?php echo $sort_by === 'percentage' ? 'selected' : ''; ?>>Percentage</option>
+                            <option value="grade" <?php echo $sort_by === 'grade' ? 'selected' : ''; ?>>Grade</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="order">Order</label>
+                        <select id="order" name="order" style="width: 100%;">
+                            <option value="ASC" <?php echo $sort_order === 'ASC' ? 'selected' : ''; ?>>Ascending</option>
+                            <option value="DESC" <?php echo $sort_order === 'DESC' ? 'selected' : ''; ?>>Descending</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sort</button>
+                </form>
+            </div>
+            
             <div class="table-container">
                 <table class="data-table">
                     <thead>
@@ -252,12 +301,13 @@ closeDBConnection($conn);
                             <th>Status</th>
                             <th>Response</th>
                             <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($queries)): ?>
                             <tr>
-                                <td colspan="7" class="text-center">No queries submitted yet</td>
+                                <td colspan="8" class="text-center">No queries submitted yet</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($queries as $query): ?>
@@ -275,6 +325,16 @@ closeDBConnection($conn);
                                         <?php endif; ?>
                                     </td>
                                     <td><?php echo formatDate($query['created_at']); ?></td>
+                                    <td>
+                                        <?php if ($query['status'] === 'pending'): ?>
+                                            <form method="POST" action="cancel_query.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this query?');">
+                                                <input type="hidden" name="query_id" value="<?php echo $query['id']; ?>">
+                                                <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                                            </form>
+                                        <?php else: ?>
+                                            <span class="text-muted">Cannot cancel</span>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
