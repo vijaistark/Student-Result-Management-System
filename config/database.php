@@ -5,9 +5,19 @@
  */
 
 // Database configuration
+// IMPORTANT: Update these values according to your MySQL setup
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+
+// Password options:
+// - If XAMPP/WAMP with no password: '' (empty string)
+// - If you set a password: 'your_password'
+// - Common defaults: '' (empty) or 'root'
+// 
+// TROUBLESHOOTING: If you get "Access denied" error, run test_db_connection.php
+// to find the correct password, then update this value.
+define('DB_PASS', '');  // CHANGE THIS: Try '', 'root', or your actual password
+
 define('DB_NAME', 'student_result_system');
 
 /**
