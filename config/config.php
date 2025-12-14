@@ -13,7 +13,9 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/database.php';
 
 // Define base URL (adjust based on your setup)
-define('BASE_URL', 'http://localhost/Student-Result-Management-System-1/');
+// For XAMPP/WAMP: http://localhost/Student-Result-Management-System-1/
+// For PHP built-in server: http://localhost:8000/
+define('BASE_URL', 'http://localhost:8000/');
 
 // Define base path
 define('BASE_PATH', __DIR__ . '/../');
