@@ -1,0 +1,15 @@
+<?php
+/**
+ * Logout Page
+ * Destroys session and redirects to login
+ */
+require_once 'config/config.php';
+
+// Destroy session
+session_destroy();
+
+// Redirect to login
+header('Location: index.php');
+exit();
+?>
+
